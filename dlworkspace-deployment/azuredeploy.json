@@ -69,12 +69,45 @@
                 "description": "Size of the worker-VM. Use a GPU VM for worker-VM."
             }
         },
+        "openIDProvider": {
+            "type": "string",
+            "defaultValue": "",
+            "allowedValues": [
+                "",
+                "Google",
+                "MSFT"
+            ],
+            "metadata": {
+                "description": "Provider for OpenID Authentication - currently supports MSFT or Google, leave blank if not using."
+            }
+        },
+        "openIDTenant": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Name of the web application registered with the authentication provider."
+            }
+        },
+        "openIDClientID": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "ClientID of the web application registered with the authentication provider."
+            }
+        },
+        "openIDClientSecret": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Client Secret of the web application registered with the authentication provider."
+            }
+        },        
         "_artifactsLocation": {
             "type": "string",
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located including a trailing '/'"
             },
-            "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/dlworkspace-deployment/"
+            "defaultValue": "https://raw.githubusercontent.com/DLWorkspace/azure-quickstart-templates/dl/dlworkspace-deployment/"
         },
         "_artifactsLocationSasToken": {
             "type": "securestring",
@@ -96,6 +129,25 @@
         "scriptFileUri": "[uri(parameters('_artifactsLocation'), concat('scripts/setupdevbox.sh', parameters('_artifactsLocationSasToken')))]",
         "singleQuote": "'"
     },
+    "functions": [
+        {
+            "namespace": "fn",
+            "members": {
+                "quoteString" : {
+                    "parameters" : [
+                        {
+                            "name" : "input",
+                            "type" : "string"
+                        }
+                    ],
+                    "output": {
+                        "type" : "string",
+                        "value": "[concat(variables('singleQuote'), parameters('input'), variables('singleQuote'))]"
+                    }
+                }
+            }
+        }
+    ],
     "resources": [
         {
             "type": "Microsoft.Compute/virtualMachines",
@@ -157,7 +209,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('bash setupdevbox.sh ', parameters('adminUsername'), ' --cluster_name ', variables('clusterName'), ' --cluster_location ', parameters('location'), ' --worker_vm_size ', parameters('workerVMSize'), ' --infra_vm_size ', parameters('infraVMSize'), '  --worker_node_num ', parameters('numberOfWorkerVM'),  ' --infra_node_num ', parameters('numberOfInfraVM'), ' --password ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' --users ', variables('singleQuote'), parameters('dlwsAdmins'), variables('singleQuote'))]"
+                    "commandToExecute": "[concat('bash setupdevbox.sh ', parameters('adminUsername'), ' --cluster_name ', variables('clusterName'), ' --cluster_location ', parameters('location'), ' --worker_vm_size ', parameters('workerVMSize'), ' --infra_vm_size ', parameters('infraVMSize'), '  --worker_node_num ', parameters('numberOfWorkerVM'),  ' --infra_node_num ', parameters('numberOfInfraVM'), ' --password ', fn.singleQuote(parameters('adminPassword')), ' --users ', fn.singleQuote(parameters('dlwsAdmins')), ' --openid_name ', fn.singleQuote(parameters('openIDProvider')), ' --openid_tenant ', fn.singleQuote(parameters('openIDTenant')), ' --openid_clientid ', fn.singleQuote(parameters('openIDClientID')), ' --openid_clientsecret ', fn.singleQuote(parameters('openIDClientSecret')))]"
                 }
             }
         },
