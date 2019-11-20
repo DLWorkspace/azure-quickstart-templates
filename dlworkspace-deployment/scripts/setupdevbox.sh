@@ -35,7 +35,7 @@ sudo apt-get install -y --no-install-recommends python-yaml python-jinja2 python
 git clone http://github.com/Microsoft/DLWorkspace /home/$username/dlworkspace
 cd /home/$username/dlworkspace
 git fetch --all
-git checkout ARMTemplate
+git checkout ARM
 
 # Create configuration files, config.yaml, and cluster.yaml
 cd /home/$username/dlworkspace/src/ClusterBootstrap
